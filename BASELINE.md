@@ -70,9 +70,7 @@ cannot be run here until the RustIQ integration checkout is supplied.
 - Both production-only and full online npm audits report 0 vulnerabilities
 - CI contract matrix added for Node.js 20 and 22
 - Production runtime confirmed as Node.js `v20.20.2`
-- Push receiver pinned to exact fork commit
-  `20508fb78992eb1114271ba9e7e8510f0c6b37b7`
-- The private Git dependency requires GitHub credentials (for example, a deploy
-  key) on machines that run `npm ci`; no credential is stored in this repository
-- GitHub Actions expects a read-only repository secret named
-  `RUSTIQ_GITHUB_TOKEN` with access to `MrMakaroni/push-receiver-rustiq`
+- Push receiver is vendored from exact fork commit
+  `6765a428e5a3fa94ab7c6515ef04867766caa9e3`
+- The core install is self-contained and does not require cross-repository
+  GitHub credentials; package-lock integrity protects the vendored tarball

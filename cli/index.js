@@ -8,8 +8,8 @@ const commandLineUsage = require('command-line-usage');
 const ChromeLauncher = require('chrome-launcher');
 const path = require('path');
 const fs = require('fs');
-const AndroidFCM = require('@liamcottle/push-receiver/src/android/fcm');
-const PushReceiverClient = require("@liamcottle/push-receiver/src/client");
+const AndroidFCM = require('../vendor/push-receiver/src/android/fcm');
+const PushReceiverClient = require('../vendor/push-receiver/src/client');
 
 let server;
 let fcmClient;

@@ -6,7 +6,7 @@ const test = require("node:test");
 const protobuf = require("protobufjs");
 
 const RustPlus = require("../rustplus");
-const pushReceiver = require("@liamcottle/push-receiver");
+const pushReceiver = require("../vendor/push-receiver/src");
 
 const proto = protobuf.loadSync(path.resolve(__dirname, "../rustplus.proto"));
 const AppRequest = proto.lookupType("rustplus.AppRequest");
@@ -31,7 +31,7 @@ test("exports the RustIQ runtime contract", () => {
     }
 });
 
-test("resolves the RustIQ push receiver contract", () => {
+test("resolves the vendored RustIQ push receiver contract", () => {
     assert.equal(typeof pushReceiver.AndroidFCM, "function");
     assert.equal(typeof pushReceiver.AndroidFCM.register, "function");
 });

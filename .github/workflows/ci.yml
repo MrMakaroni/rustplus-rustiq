@@ -11,8 +11,6 @@ jobs:
   contract:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    env:
-      GIT_TERMINAL_PROMPT: 0
     strategy:
       matrix:
         node: [20, 22]
@@ -22,19 +20,6 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: npm
-      - name: Configure private dependency access
-        shell: bash
-        env:
-          RUSTIQ_GITHUB_TOKEN: ${{ secrets.RUSTIQ_GITHUB_TOKEN }}
-        run: |
-          if [ -z "$RUSTIQ_GITHUB_TOKEN" ]; then
-            echo "::error::Add a read-only RUSTIQ_GITHUB_TOKEN secret with access to MrMakaroni/push-receiver-rustiq"
-            exit 1
-          fi
-          git config --global credential.helper store
-          printf 'protocol=https\nhost=github.com\nusername=MrMakaroni\npassword=%s\n\n' "$RUSTIQ_GITHUB_TOKEN" | git credential approve
-          git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
-          git ls-remote ssh://git@github.com/MrMakaroni/push-receiver-rustiq.git HEAD >/dev/null
       - run: npm ci
       - run: npm test
       - run: node --check rustplus.js
