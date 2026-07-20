@@ -4,7 +4,6 @@ const path = require('path');
 const WebSocket = require('ws');
 const protobuf = require("protobufjs");
 const { EventEmitter } = require('events');
-const Camera = require('./camera');
 
 class RustPlus extends EventEmitter {
 
@@ -47,7 +46,7 @@ class RustPlus extends EventEmitter {
         protobuf.load(path.resolve(__dirname, "rustplus.proto")).then((root) => {
 
             // make sure existing connection is disconnected before connecting again.
-            if(this.websocket){
+            if (this.websocket) {
                 this.disconnect();
             }
 
@@ -73,12 +72,11 @@ class RustPlus extends EventEmitter {
             });
 
             this.websocket.on('message', (data) => {
-
                 // decode received message
                 var message = this.AppMessage.decode(data);
 
                 // check if received message is a response and if we have a callback registered for it
-                if(message.response && message.response.seq && this.seqCallbacks[message.response.seq]){
+                if (message.response && message.response.seq && this.seqCallbacks[message.response.seq]) {
 
                     // get the callback for the response sequence
                     var callback = this.seqCallbacks[message.response.seq];
@@ -90,7 +88,7 @@ class RustPlus extends EventEmitter {
                     delete this.seqCallbacks[message.response.seq];
 
                     // if callback returns true, don't fire message event
-                    if(result){
+                    if (result) {
                         return;
                     }
 
@@ -114,10 +112,11 @@ class RustPlus extends EventEmitter {
      * Disconnect from the Rust Server.
      */
     disconnect() {
-        if(this.websocket){
+        if (this.websocket) {
             this.websocket.terminate();
             this.websocket = null;
         }
+        this.seqCallbacks = [];
     }
 
     /**
@@ -125,7 +124,7 @@ class RustPlus extends EventEmitter {
      * @returns {boolean}
      */
     isConnected() {
-        return this.websocket != null;
+        return Boolean(this.websocket && this.websocket.readyState === WebSocket.OPEN);
     }
 
     /**
@@ -139,7 +138,7 @@ class RustPlus extends EventEmitter {
         let currentSeq = ++this.seq;
 
         // save callback if provided
-        if(callback){
+        if (callback) {
             this.seqCallbacks[currentSeq] = callback;
         }
 
@@ -157,6 +156,8 @@ class RustPlus extends EventEmitter {
         // fire event when request has been sent, this is useful for logging
         this.emit('request', request);
 
+        return currentSeq;
+
     }
 
     /**
@@ -167,18 +168,23 @@ class RustPlus extends EventEmitter {
     sendRequestAsync(data, timeoutMilliseconds = 10000) {
         return new Promise((resolve, reject) => {
 
+            let requestSeq;
+
             // reject promise after timeout
             var timeout = setTimeout(() => {
+                if (requestSeq !== undefined) {
+                    delete this.seqCallbacks[requestSeq];
+                }
                 reject(new Error('Timeout reached while waiting for response'));
             }, timeoutMilliseconds);
 
             // send request
-            this.sendRequest(data, (message) => {
+            requestSeq = this.sendRequest(data, (message) => {
 
                 // cancel timeout
                 clearTimeout(timeout);
 
-                if(message.response.error){
+                if (message.response.error) {
 
                     // reject promise if server returns an AppError for this request
                     reject(message.response.error);
@@ -277,7 +283,7 @@ class RustPlus extends EventEmitter {
             },
         }, callback);
     }
-    
+
     /**
      * Get the ingame time
     */
@@ -337,10 +343,9 @@ class RustPlus extends EventEmitter {
 
     /**
      * Unsubscribes from a Camera
-     * @param identifier Camera Identifier
      * @param callback
      */
-    unsubscribeFromCamera(identifier, callback) {
+    unsubscribeFromCamera(callback) {
         this.sendRequest({
             cameraUnsubscribe: {
 
@@ -373,6 +378,19 @@ class RustPlus extends EventEmitter {
      * @returns {Camera}
      */
     getCamera(identifier) {
+        let Camera;
+        try {
+            Camera = require('./camera');
+        } catch (error) {
+            if (error.code === 'MODULE_NOT_FOUND') {
+                const cameraError = new Error(
+                    'Camera support requires the optional jimp dependency. Install jimp@^0.22.12 to use getCamera().'
+                );
+                cameraError.cause = error;
+                throw cameraError;
+            }
+            throw error;
+        }
         return new Camera(this, identifier);
     }
 
