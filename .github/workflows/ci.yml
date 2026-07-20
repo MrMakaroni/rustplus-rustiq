@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - name: Configure private dependency access
+        shell: bash
+        env:
+          RUSTIQ_GITHUB_TOKEN: ${{ secrets.RUSTIQ_GITHUB_TOKEN }}
+        run: |
+          if [ -z "$RUSTIQ_GITHUB_TOKEN" ]; then
+            echo "::error::Add a read-only RUSTIQ_GITHUB_TOKEN secret with access to MrMakaroni/push-receiver-rustiq"
+            exit 1
+          fi
+          git config --global url."https://x-access-token:${RUSTIQ_GITHUB_TOKEN}@github.com/".insteadOf "ssh://git@github.com/"
+      - run: npm ci
+      - run: npm test
+      - run: node --check rustplus.js
+      - run: node --check camera.js

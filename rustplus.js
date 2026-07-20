@@ -4,7 +4,6 @@ const path = require('path');
 const WebSocket = require('ws');
 const protobuf = require("protobufjs");
 const { EventEmitter } = require('events');
-const Camera = require('./camera');
 
 class RustPlus extends EventEmitter {
 
@@ -117,6 +116,7 @@ class RustPlus extends EventEmitter {
             this.websocket.terminate();
             this.websocket = null;
         }
+        this.seqCallbacks = [];
     }
 
     /**
@@ -124,7 +124,7 @@ class RustPlus extends EventEmitter {
      * @returns {boolean}
      */
     isConnected() {
-        return (this.websocket.readyState === WebSocket.OPEN);
+        return Boolean(this.websocket && this.websocket.readyState === WebSocket.OPEN);
     }
 
     /**
@@ -156,6 +156,8 @@ class RustPlus extends EventEmitter {
         // fire event when request has been sent, this is useful for logging
         this.emit('request', request);
 
+        return currentSeq;
+
     }
 
     /**
@@ -166,13 +168,18 @@ class RustPlus extends EventEmitter {
     sendRequestAsync(data, timeoutMilliseconds = 10000) {
         return new Promise((resolve, reject) => {
 
+            let requestSeq;
+
             // reject promise after timeout
             var timeout = setTimeout(() => {
+                if (requestSeq !== undefined) {
+                    delete this.seqCallbacks[requestSeq];
+                }
                 reject(new Error('Timeout reached while waiting for response'));
             }, timeoutMilliseconds);
 
             // send request
-            this.sendRequest(data, (message) => {
+            requestSeq = this.sendRequest(data, (message) => {
 
                 // cancel timeout
                 clearTimeout(timeout);
@@ -371,6 +378,19 @@ class RustPlus extends EventEmitter {
      * @returns {Camera}
      */
     getCamera(identifier) {
+        let Camera;
+        try {
+            Camera = require('./camera');
+        } catch (error) {
+            if (error.code === 'MODULE_NOT_FOUND') {
+                const cameraError = new Error(
+                    'Camera support requires the optional jimp dependency. Install jimp@^0.22.12 to use getCamera().'
+                );
+                cameraError.cause = error;
+                throw cameraError;
+            }
+            throw error;
+        }
         return new Camera(this, identifier);
     }
 

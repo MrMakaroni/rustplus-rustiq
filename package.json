@@ -1,14 +1,21 @@
 {
   "name": "@liamcottle/rustplus.js",
-  "version": "2.5.0",
+  "version": "2.5.0-rustiq.1",
   "description": "Unofficial NodeJS library for controlling Smart Switches in the PC game Rust",
   "main": "rustplus.js",
+  "engines": {
+    "node": ">=20.20.2"
+  },
+  "scripts": {
+    "test": "node test/contract.test.js",
+    "test:contract": "node test/contract.test.js"
+  },
   "bin": {
     "rustplus": "./cli/index.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/liamcottle/rustplus.js.git"
+    "url": "git+https://github.com/MrMakaroni/rustplus-rustiq.git"
   },
   "keywords": [
     "rust",
@@ -25,19 +32,26 @@
   "author": "Liam Cottle",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/liamcottle/rustplus.js/issues"
+    "url": "https://github.com/MrMakaroni/rustplus-rustiq/issues"
   },
-  "homepage": "https://github.com/liamcottle/rustplus.js#readme",
+  "homepage": "https://github.com/MrMakaroni/rustplus-rustiq#readme",
   "dependencies": {
-    "@liamcottle/push-receiver": "^0.0.3",
-    "axios": "^1.2.2",
+    "@liamcottle/push-receiver": "git+https://github.com/MrMakaroni/push-receiver-rustiq.git#20508fb78992eb1114271ba9e7e8510f0c6b37b7",
+    "axios": "^1.18.1",
     "chrome-launcher": "^0.15.0",
     "command-line-args": "^5.2.0",
     "command-line-usage": "^6.1.1",
-    "express": "^4.17.1",
-    "jimp": "^0.22.7",
-    "protobufjs": "^7.1.2",
-    "uuid": "^9.0.0",
-    "ws": "^8.3.0"
+    "express": "^4.22.2",
+    "protobufjs": "^7.6.5",
+    "uuid": "^11.1.1",
+    "ws": "^8.21.1"
+  },
+  "peerDependencies": {
+    "jimp": "^0.22.12"
+  },
+  "peerDependenciesMeta": {
+    "jimp": {
+      "optional": true
+    }
   }
 }
