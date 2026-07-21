@@ -30,7 +30,7 @@ async function register(androidId, securityToken, appId) {
   return credentials;
 }
 
-async function checkIn(androidId, securityToken) {
+async function checkIn(androidId, securityToken, options = {}) {
   await loadProtoFile();
   const buffer = getCheckinRequest(androidId, securityToken);
   const body = await request({
@@ -41,6 +41,7 @@ async function checkIn(androidId, securityToken) {
     },
     body     : buffer,
     encoding : null,
+    signal   : options.signal,
   });
   const message = AndroidCheckinResponse.decode(body);
   const object = AndroidCheckinResponse.toObject(message, {
