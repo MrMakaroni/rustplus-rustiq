@@ -17,7 +17,10 @@ async function requestWithRetry(options) {
         try {
             return await requestOnce(options);
         } catch (error) {
-            if (attempt >= retries) {
+            if (options.signal?.aborted) {
+                throw options.signal.reason || error;
+            }
+            if (attempt >= retries || !isRetryable(error)) {
                 throw error;
             }
 
@@ -25,7 +28,7 @@ async function requestWithRetry(options) {
                 Math.min(attempt * RETRY_STEP_SECONDS, MAX_RETRY_DELAY_SECONDS) * 1000;
             console.error(`Request failed: ${error.message}`);
             console.error(`Retrying in ${delayMilliseconds / 1000} seconds`);
-            await waitFor(delayMilliseconds);
+            await waitFor(delayMilliseconds, options.signal);
         }
     }
 }
@@ -95,4 +98,20 @@ function isBodyValue(value) {
         value instanceof URLSearchParams ||
         value instanceof Blob ||
         value instanceof FormData;
+}
+
+function isRetryable(error) {
+    if (error?.name === 'AbortError') {
+        return false;
+    }
+
+    const statusCode = error?.statusCode;
+    if (statusCode === undefined) {
+        return true;
+    }
+
+    return statusCode === 408 ||
+        statusCode === 425 ||
+        statusCode === 429 ||
+        statusCode >= 500;
 }

@@ -1,6 +1,6 @@
 {
   "name": "@liamcottle/rustplus.js",
-  "version": "2.5.0-rustiq.1",
+  "version": "2.5.0-rustiq.2",
   "description": "Unofficial NodeJS library for controlling Smart Switches in the PC game Rust",
   "main": "rustplus.js",
   "engines": {

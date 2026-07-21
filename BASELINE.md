@@ -71,6 +71,6 @@ cannot be run here until the RustIQ integration checkout is supplied.
 - CI contract matrix added for Node.js 20 and 22
 - Production runtime confirmed as Node.js `v20.20.2`
 - Push receiver is vendored from exact fork commit
-  `6765a428e5a3fa94ab7c6515ef04867766caa9e3`
+  `76b0e81302d9194f97f4f06acb454ef6d4d29e96`
 - The core install is self-contained and does not require cross-repository
   GitHub credentials; package-lock integrity protects the vendored tarball
