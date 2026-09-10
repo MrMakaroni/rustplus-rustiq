@@ -58,6 +58,7 @@ message ClanInfo {
 	repeated ClanInfo.Member members = 11;
 	repeated ClanInfo.Invite invites = 12;
 	optional int32 maxMemberCount = 13;
+	optional int64 score = 14;
 
 	message Role {
 		int32 roleId = 1;
@@ -71,6 +72,7 @@ message ClanInfo {
 		bool canDemote = 9;
 		bool canSetPlayerNotes = 10;
 		bool canAccessLogs = 11;
+		bool canAccessScoreEvents = 12;
 	}
 
 	message Member {
@@ -110,6 +112,37 @@ message ClanInvitations {
 		int64 clanId = 1;
 		uint64 recruiter = 2;
 		int64 timestamp = 3;
+	}
+}
+
+message ClanLeaderboard {
+	repeated ClanLeaderboard.Entry entries = 1;
+
+	message Entry {
+		int64 clanId = 1;
+		string name = 2;
+		int64 score = 3;
+	}
+}
+
+message ClanManager {
+	string backendType = 1;
+}
+
+message ClanScoreEvents {
+	int64 clanId = 1;
+	repeated ClanScoreEvents.Entry scoreEvents = 2;
+
+	message Entry {
+		int64 timestamp = 1;
+		int32 type = 2;
+		int32 score = 3;
+		int32 multiplier = 4;
+		uint64 steamId = 5;
+		uint64 otherSteamId = 6;
+		int64 otherClanId = 7;
+		optional string arg1 = 8;
+		optional string arg2 = 9;
 	}
 }
 
@@ -157,6 +190,7 @@ message AppRequest {
 	optional AppCameraSubscribe cameraSubscribe = 30;
 	optional AppEmpty cameraUnsubscribe = 31;
 	optional AppCameraInput cameraInput = 32;
+	optional AppTeamKick kickFromTeam = 33;
 }
 
 message AppMessage {
@@ -203,6 +237,10 @@ message AppSetEntityValue {
 }
 
 message AppPromoteToLeader {
+	uint64 steamId = 1;
+}
+
+message AppTeamKick {
 	uint64 steamId = 1;
 }
 

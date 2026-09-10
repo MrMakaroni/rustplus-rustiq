@@ -95,6 +95,15 @@ The inherited convenience methods remain available, including server info,
 time, team info, map, map markers, team chat, entity reads, and smart-device
 updates. Rust server rate limits and permissions still apply.
 
+The RustIQ fork also tracks the current team-management and clan protocol:
+
+- `promoteToLeader(steamId)` transfers team leadership;
+- `kickFromTeam(steamId)` removes a teammate, or leaves the team when passed
+  the paired player's own Steam ID;
+- `getClanInfo()`, `getClanChat()`, `sendClanMessage()`, and `setClanMotd()`;
+- current clan score, leaderboard, score-event, role-permission, and manager
+  protobuf messages.
+
 ## Pairing and credentials
 
 A connection requires the Rust server address, `app.port`, Steam ID, and a

@@ -329,6 +329,52 @@ class RustPlus extends EventEmitter {
     }
 
     /**
+     * Promote a team member to leader.
+     * @param steamId SteamID64 of the new leader
+     * @param callback
+     */
+    promoteToLeader(steamId, callback) {
+        this.sendRequest({
+            promoteToLeader: {
+                steamId: String(steamId),
+            },
+        }, callback);
+    }
+
+    /**
+     * Remove a team member, or leave the team when steamId is the paired player.
+     * @param steamId SteamID64 of the member to remove
+     * @param callback
+     */
+    kickFromTeam(steamId, callback) {
+        this.sendRequest({
+            kickFromTeam: {
+                steamId: String(steamId),
+            },
+        }, callback);
+    }
+
+    /** Get clan information for the paired player. */
+    getClanInfo(callback) {
+        this.sendRequest({ getClanInfo: {} }, callback);
+    }
+
+    /** Set the paired player's clan message of the day. */
+    setClanMotd(message, callback) {
+        this.sendRequest({ setClanMotd: { message } }, callback);
+    }
+
+    /** Get recent clan chat messages. */
+    getClanChat(callback) {
+        this.sendRequest({ getClanChat: {} }, callback);
+    }
+
+    /** Send a message to clan chat. */
+    sendClanMessage(message, callback) {
+        this.sendRequest({ sendClanMessage: { message } }, callback);
+    }
+
+    /**
      * Subscribes to a Camera
      * @param identifier Camera Identifier, such as OILRIG1 (or custom name)
      * @param callback

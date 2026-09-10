@@ -26,9 +26,55 @@ test("exports the RustIQ runtime contract", () => {
         "on",
         "off",
         "sendRequestAsync",
+        "promoteToLeader",
+        "kickFromTeam",
+        "getClanInfo",
+        "setClanMotd",
+        "getClanChat",
+        "sendClanMessage",
     ]) {
         assert.equal(typeof RustPlus.prototype[method], "function", method);
     }
+});
+
+test("encodes current team management and clan request contracts", () => {
+    const kickBytes = AppRequest.encode(AppRequest.fromObject({
+        seq: 1,
+        playerId: "76561198000000000",
+        playerToken: 12345,
+        kickFromTeam: { steamId: "76561198000000001" },
+    })).finish();
+    assert.notEqual(kickBytes.indexOf(Buffer.from([0x8a, 0x02])), -1, "kickFromTeam must use field 33");
+    const kick = AppRequest.decode(kickBytes);
+    assert.equal(kick.kickFromTeam.steamId.toString(), "76561198000000001");
+
+    const clan = AppRequest.decode(AppRequest.encode(AppRequest.fromObject({
+        seq: 2,
+        playerId: "76561198000000000",
+        playerToken: 12345,
+        setClanMotd: { message: "Raid at 20:00" },
+    })).finish());
+    assert.equal(clan.setClanMotd.message, "Raid at 20:00");
+});
+
+test("round-trips current clan score fields", () => {
+    const ClanInfo = proto.lookupType("rustplus.ClanInfo");
+    const clan = ClanInfo.decode(ClanInfo.encode(ClanInfo.fromObject({
+        clanId: "42",
+        name: "RustIQ",
+        created: "1",
+        creator: "76561198000000000",
+        score: "9001",
+        roles: [{
+            roleId: 1,
+            rank: 0,
+            name: "Leader",
+            canAccessScoreEvents: true,
+        }],
+    })).finish());
+
+    assert.equal(clan.score.toString(), "9001");
+    assert.equal(clan.roles[0].canAccessScoreEvents, true);
 });
 
 test("resolves the vendored RustIQ push receiver contract", () => {
